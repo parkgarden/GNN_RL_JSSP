@@ -1,8 +1,8 @@
 import numpy as np
 from uniform_instance_gen import uni_instance_gen
 
-j = 20
-m = 10
+j = 1000
+m = 20
 l = 1
 h = 99
 batch_size = 100

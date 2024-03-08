@@ -11,11 +11,11 @@ import math
 device = configs.device
 
 parser = argparse.ArgumentParser(description='Arguments for test_learned_on_benchmark')
-parser.add_argument('--Pn_j', type=int, default=30, help='Number of jobs of instances to test')
+parser.add_argument('--Pn_j', type=int, default=50, help='Number of jobs of instances to test')
 parser.add_argument('--Pn_m', type=int, default=20, help='Number of machines instances to test')
 parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
 parser.add_argument('--Nn_m', type=int, default=20, help='Number of machines on which to be loaded net are trained')
-parser.add_argument('--which_benchmark', type=str, default='tai', help='Which benchmark to test')
+parser.add_argument('--which_benchmark', type=str, default='dmu', help='Which benchmark to test')
 params = parser.parse_args()
 
 N_JOBS_P = params.Pn_j
@@ -50,6 +50,7 @@ g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
                          device=device)
 
 dataLoaded = np.load('./BenchDataNmpy/' + benchmark + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + '.npy')
+
 dataset = []
 for i in range(dataLoaded.shape[0]):
     dataset.append((dataLoaded[i][0], dataLoaded[i][1]))
@@ -111,7 +112,7 @@ for i, data in enumerate(dataset):
                         # indeices_screened.append(indices[-j-1])
 
                         #screen out neighborhood of action from candidate
-                        machine_screened.append(action_machine)
+                        # machine_screened.append(action_machine)
                         
                     else:
                         screen_count += 1

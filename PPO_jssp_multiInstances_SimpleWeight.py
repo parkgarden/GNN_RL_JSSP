@@ -283,7 +283,7 @@ def main(w_j, w_m):
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
         if (i_update + 1) % 100 == 0:
-            file_writing_obj = open('./' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw_'+str(w_j)+'_'+str(w_m)+'_v0', 'w')
+            file_writing_obj = open('./' + 'log_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw(10000)_'+str(w_j)+'_'+str(w_m)+'_v0', 'w')
             file_writing_obj.write(str(log))
 
         # log results
@@ -297,11 +297,11 @@ def main(w_j, w_m):
             validation_log.append(vali_result)
             if vali_result < record:
                 torch.save(ppo.policy.state_dict(), './{}.pth'.format(
-                    str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw_'+str(w_j)+'_'+str(w_m)+'_v0'))
+                    str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw(10000)_'+str(w_j)+'_'+str(w_m)+'_v0'))
                 record = vali_result
             print('The validation quality is:', vali_result)
             file_writing_obj1 = open(
-                './' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw_'+str(w_j)+'_'+str(w_m)+'_v0', 'w')
+                './' + 'vali_' + str(configs.n_j) + '_' + str(configs.n_m) + '_' + str(configs.low) + '_' + str(configs.high) + '_sw(10000)_'+str(w_j)+'_'+str(w_m)+'_v0', 'w')
             file_writing_obj1.write(str(validation_log))
         t5 = time.time()
 
@@ -312,7 +312,8 @@ def main(w_j, w_m):
 if __name__ == '__main__':
     
     w_j = 1
-    w_m_list = [1.5, 0.5]
+    # w_m_list = [0.25, 0.5, 0.75, 1.25, 1.5, 1.75]
+    w_m_list = [0.25, 0.75, 1.25, 1.75]
     cpu_times = []
     # w_m = 1.5
     for w_m in w_m_list:

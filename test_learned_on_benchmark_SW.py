@@ -9,10 +9,10 @@ import time
 device = configs.device
 
 parser = argparse.ArgumentParser(description='Arguments for test_learned_on_benchmark')
-parser.add_argument('--Pn_j', type=int, default=30, help='Number of jobs of instances to test')
+parser.add_argument('--Pn_j', type=int, default=100, help='Number of jobs of instances to test')
 parser.add_argument('--Pn_m', type=int, default=20, help='Number of machines instances to test')
-parser.add_argument('--Nn_j', type=int, default=15, help='Number of jobs on which to be loaded net are trained')
-parser.add_argument('--Nn_m', type=int, default=15, help='Number of machines on which to be loaded net are trained')
+parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
+parser.add_argument('--Nn_m', type=int, default=20, help='Number of machines on which to be loaded net are trained')
 parser.add_argument('--which_benchmark', type=str, default='tai', help='Which benchmark to test')
 params = parser.parse_args()
 
@@ -25,8 +25,11 @@ LOW = configs.low
 HIGH = configs.high
 
 from JSSP_Env import SJSSP
-from PPO_jssp_multiInstances import PPO
+from PPO_jssp_multiInstances_SimpleWeight import PPO
 env = SJSSP(n_j=N_JOBS_P, n_m=N_MACHINES_P)
+
+w_j = 1
+w_m = 1.5
 
 ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           n_j=N_JOBS_P,
@@ -40,8 +43,8 @@ ppo = PPO(configs.lr, configs.gamma, configs.k_epochs, configs.eps_clip,
           hidden_dim_actor=configs.hidden_dim_actor,
           num_mlp_layers_critic=configs.num_mlp_layers_critic,
           hidden_dim_critic=configs.hidden_dim_critic)
-# path = './{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH))
-path = './{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH) + '_sw_1_1.5_v0')
+# path = './SavedNetwork/{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH))
+path = './{}.pth'.format(str(N_JOBS_N) + '_' + str(N_MACHINES_N) + '_' + str(LOW) + '_' + str(HIGH) + '_sw_'+str(w_j)+'_'+str(w_m)+'_v0')
 
 ppo.policy.load_state_dict(torch.load(path))
 g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
@@ -56,8 +59,6 @@ for i in range(dataLoaded.shape[0]):
 
 result = []
 
-w_j = 1
-w_m = 1.5
 
 for i, data in enumerate(dataset):
     t1 = time.time()
@@ -111,6 +112,7 @@ file_writing_obj.write(str((t2 - t1)/len(dataset)))
 # print(result)
 # print(np.array(result, dtype=np.single).mean())
 np.save('drlResult_' + benchmark + '_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + '_sw_'+str(w_j)+'_'+str(w_m)+'_v0', np.array(result, dtype=np.single))
+# np.save('drlResult_' + benchmark + '_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P), np.array(result, dtype=np.single))
 
 
 '''refer = np.array([1231, 1244, 1218, 1175, 1224, 1238, 1227, 1217, 1274, 1241])

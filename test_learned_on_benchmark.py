@@ -9,11 +9,11 @@ import time
 device = configs.device
 
 parser = argparse.ArgumentParser(description='Arguments for test_learned_on_benchmark')
-parser.add_argument('--Pn_j', type=int, default=30, help='Number of jobs of instances to test')
+parser.add_argument('--Pn_j', type=int, default=50, help='Number of jobs of instances to test')
 parser.add_argument('--Pn_m', type=int, default=20, help='Number of machines instances to test')
 parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
 parser.add_argument('--Nn_m', type=int, default=20, help='Number of machines on which to be loaded net are trained')
-parser.add_argument('--which_benchmark', type=str, default='tai', help='Which benchmark to test')
+parser.add_argument('--which_benchmark', type=str, default='dmu', help='Which benchmark to test')
 params = parser.parse_args()
 
 N_JOBS_P = params.Pn_j
@@ -23,6 +23,8 @@ N_JOBS_N = params.Nn_j
 N_MACHINES_N = params.Nn_m
 LOW = configs.low
 HIGH = configs.high
+
+print(N_JOBS_P, N_MACHINES_P)
 
 from JSSP_Env import SJSSP
 from PPO_jssp_multiInstances import PPO
@@ -55,8 +57,11 @@ for i in range(dataLoaded.shape[0]):
 result = []
 t1 = time.time()
 for i, data in enumerate(dataset):
+    t5 = time.time()
+    
     adj, fea, candidate, mask = env.reset(data)
     ep_reward = - env.max_endTime
+    
     while True:
         # Running policy_old:
         fea_tensor = torch.from_numpy(np.copy(fea)).to(device)
@@ -79,8 +84,10 @@ for i, data in enumerate(dataset):
 
         if done:
             break
+    t6 = time.time()
     # print(max(env.end_time))
     print('Instance' + str(i + 1) + ' makespan:', -ep_reward + env.posRewards)
+    print("cpu time:", t6 - t5)
     result.append(-ep_reward + env.posRewards)
 t2 = time.time()
 file_writing_obj = open('./' + 'drltime_' + benchmark + '_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + '.txt', 'w')

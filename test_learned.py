@@ -10,12 +10,12 @@ import numpy as np
 device = torch.device(configs.device)
 
 parser = argparse.ArgumentParser(description='Arguments for ppo_jssp')
-parser.add_argument('--Pn_j', type=int, default=15, help='Number of jobs of instances to test')
-parser.add_argument('--Pn_m', type=int, default=15, help='Number of machines instances to test')
-parser.add_argument('--Nn_j', type=int, default=15, help='Number of jobs on which to be loaded net are trained')
-parser.add_argument('--Nn_m', type=int, default=15, help='Number of machines on which to be loaded net are trained')
+parser.add_argument('--Pn_j', type=int, default=50, help='Number of jobs of instances to test')
+parser.add_argument('--Pn_m', type=int, default=20, help='Number of machines instances to test')
+parser.add_argument('--Nn_j', type=int, default=30, help='Number of jobs on which to be loaded net are trained')
+parser.add_argument('--Nn_m', type=int, default=20, help='Number of machines on which to be loaded net are trained')
 parser.add_argument('--low', type=int, default=1, help='LB of duration')
-parser.add_argument('--high', type=int, default=99, help='UB of duration')
+parser.add_argument('--high', type=int, default=199, help='UB of duration')
 parser.add_argument('--seed', type=int, default=200, help='Seed for validate set generation')
 params = parser.parse_args()
 
@@ -27,6 +27,7 @@ SEED = params.seed
 N_JOBS_N = params.Nn_j
 N_MACHINES_N = params.Nn_m
 
+batch = 20
 
 from JSSP_Env import SJSSP
 from PPO_jssp_multiInstances import PPO
@@ -56,7 +57,8 @@ g_pool_step = g_pool_cal(graph_pool_type=configs.graph_pool_type,
 from uniform_instance_gen import uni_instance_gen
 np.random.seed(SEED)
 
-dataLoaded = np.load('./DataGen/generatedData' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
+# dataLoaded = np.load('./DataGen/generatedData' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_Seed' + str(SEED) + '.npy')
+dataLoaded = np.load('./DataGen/generatedData' + str(N_JOBS_P) + '_' + str(N_MACHINES_P) + '_PT' + str(LOW) + '_' + str(HIGH) +'_Seed' + str(SEED) + '_batch'+ str(batch) +'.npy')
 dataset = []
 
 for i in range(dataLoaded.shape[0]):
@@ -75,7 +77,7 @@ def test(dataset):
         adj, fea, candidate, mask = env.reset(data)
         ep_reward = - env.max_endTime
         # delta_t = []
-        # t5 = time.time()
+        t5 = time.time()
         while True:
             # t3 = time.time()
             fea_tensor = torch.from_numpy(fea).to(device)
@@ -100,21 +102,22 @@ def test(dataset):
 
             if done:
                 break
-        # t6 = time.time()
-        # print(t6 - t5)
+        t6 = time.time()
+        
         # print(max(env.end_time))
         print('Instance' + str(i + 1) + ' makespan:', -ep_reward + env.posRewards)
+        print("cpu time:", t6 - t5)
         result.append(-ep_reward + env.posRewards)
         # print(sum(delta_t))
     # torch.cuda.synchronize()
     t2 = time.time()
     print(t2 - t1)
-    file_writing_obj = open('./' + 'drltime_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + '.txt', 'w')
+    file_writing_obj = open('./' + 'drltime_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + 'PT' + str(LOW) + '_' + str(HIGH) +'_batch'+ str(batch) + '.txt', 'w')
     file_writing_obj.write(str((t2 - t1)/len(dataset)))
 
     # print(result)
     # print(np.array(result, dtype=np.single).mean())
-    np.save('drlResult_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + '_Seed' + str(SEED), np.array(result, dtype=np.single))
+    np.save('drlResult_' + str(N_JOBS_N) + 'x' + str(N_MACHINES_N) + '_' + str(N_JOBS_P) + 'x' + str(N_MACHINES_P) + 'PT' + str(LOW) + '_' + str(HIGH) + '_Seed' + str(SEED) + '_batch'+ str(batch), np.array(result, dtype=np.single))
     # print(np.array(result, dtype=np.single).mean())
 
 
